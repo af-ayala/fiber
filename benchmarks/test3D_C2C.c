@@ -135,10 +135,10 @@ int main(int argc, char** argv){
     }
 
     // Output after forward
-    // for(i=0; i<local_fft_size; i++) 
-    //     printf(" %g+%gi, ", output[i].r, output[i].i);
-    // printf("\n");
-    // printf("\n");
+    for(i=0; i<local_fft_size; i++) 
+        printf(" %g+%gi, ", output[i].r, output[i].i);
+    printf("\n");
+    printf("\n");
 
     MPI_Barrier(MPI_COMM_WORLD);
 

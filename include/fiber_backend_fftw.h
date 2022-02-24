@@ -52,7 +52,6 @@ void compute_z2z_fftw( int const inbox_low[3], int const inbox_high[3],
     nx = fftw_options[1];
     ny = fftw_options[2];
     nz = fftw_options[3];
-    nx=ny=nz=4;
 
     // Global size, to come as input later on
     // Plan creation ...
@@ -74,14 +73,18 @@ void compute_z2z_fftw( int const inbox_low[3], int const inbox_high[3],
     }        
     timer[0] += MPI_Wtime();
 
+    // Warmup
+    MPI_Barrier(comm);
+	fftw_execute(plan_z2z);
+
     // FFT execution
     MPI_Barrier(comm);
     timer[1] = -MPI_Wtime();
 
-	// for(int i = 0; i < niter; i++){
+	for(int i = 0; i < fftw_options[8]; i++){
 		fftw_execute(plan_z2z);
 		// fftw_mpi_execute_dft(plan_z2z, (fftw_complex *) in, (fftw_complex *) out);
-	// }
+	}
 
     MPI_Barrier(comm);
     timer[1] = +MPI_Wtime();

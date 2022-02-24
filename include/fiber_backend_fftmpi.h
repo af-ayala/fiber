@@ -29,7 +29,9 @@ void compute_z2z_fftmpi( int const inbox_low[3], int const inbox_high[3],
     printf("Complex-to-Complex with FFTMPI. \n");
     // setup
     int nx,ny,nz;
-    nx = ny = nz = 4;
+    nx = fftmpi_options[1];
+    ny = fftmpi_options[2];
+    nz = fftmpi_options[3];
     int precision = 2;
 
     int permute = 0;
@@ -66,22 +68,28 @@ void compute_z2z_fftmpi( int const inbox_low[3], int const inbox_high[3],
                     outbox_low[0], outbox_high[0], outbox_low[1], outbox_high[1], outbox_low[2], outbox_high[2], 
                     permute, &fftsize, &sendsize, &recvsize);
     } else {
-        printf("Tuning functions added.");
+        printf("Tuning functions need to be added.");
     }
     MPI_Barrier(comm);
 
     printf("given size by plan = %d \n", fftsize);
-
     timer[0] += MPI_Wtime();
 
+    // Warmup
+    MPI_Barrier(comm);
+    fft3d_compute(plan, (double *) in , (double *) out , -1);
 
     MPI_Barrier(comm);
     timer[1] = -MPI_Wtime();
 
-    if(fftmpi_options[0]==0)
-        fft3d_compute(plan, (double *)in , (double *)in , -1); // -1 is for Forward
+    if(fftmpi_options[0]==0){
+        for (int i=0; i<fftmpi_options[8]; ++i){
+            fft3d_compute(plan, (double *) in , (double *) out , -1); // -1 is for Forward
+            out = in;
+        }            
+    }
     else
-        fft3d_compute(plan, (double *)in , (double *)in , 1); // 1 is for Backward
+        fft3d_compute(plan, (double *) in , (double *) out , 1); // 1 is for Backward
 
     MPI_Barrier(comm);
     timer[1] = +MPI_Wtime();
